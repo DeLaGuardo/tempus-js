@@ -43,6 +43,10 @@
             }
             return v;
         },
+        formattingWithoutNulls = function (val) {
+            var v = val.toString();
+            return v;
+        },
         parseBadFormat = function (date, defaults) {
             if (defaults !== undefined) {
                 date.year(defaults.year() || defaults.year);
@@ -190,6 +194,25 @@
             xhr.open("GET", path, false);
             xhr.send();
         },
+        // %a  - The abbreviated weekday name (Sun)
+        // %A  - The full weekday name (Sunday)
+        // %b  - The abbreviated month name (Jan)
+        // %B  - The full month name (January)
+        // %c  - The preferred local date and time representation
+        // %H  - Hour of the day, 24-hour clock (00..23)
+        // %-H - Hour of the day, 24-hour clock (0..23)
+        // %I  - Hour of the day, 12-hour clock (01..12)
+        // %-I - Hour of the day, 12-hour clock (1..12)
+        // %M  - Minute of the hour (00..59)
+        // %-M - Minute of the hour (0..59)
+        // %p  - Meridian indicator (AM  or  PM)
+        // %S  - Second of the minute (00..60)
+        // %-S - Second of the minute (0..60)
+        // %w  - Day of the week (Sunday is 0, 0..6)
+        // %y  - Year without a century (00..99)
+        // %-y - Year without a century (0..99)
+        // %Y  - Year with century
+        // %z  - Timezone offset (+0545)
         registeredFormats = {
             '%d': {
                 format: function (date) {
@@ -203,6 +226,18 @@
                 maxLength: 2,
                 type: "number"
             },
+            '%-d': {
+                format: function (date) {
+                    return formattingWithoutNulls(date.day() || tempus.MIN_DAY);
+                },
+                parse: function (value) {
+                    var v = Number(value);
+                    return {day: (isNaN(v) ? undefined : v) };
+                },
+                minLength: 1,
+                maxLength: 2,
+                type: "number"
+            },
             '%m': {
                 format: function (date) {
                     return formattingWithNulls(date.month() || tempus.MIN_MONTH, 2);
@@ -212,6 +247,18 @@
                     return {month: (isNaN(v) ? undefined : v) };
                 },
                 minLength: 2,
+                maxLength: 2,
+                type: "number"
+            },
+            '%-m': {
+                format: function (date) {
+                    return formattingWithoutNulls(date.month() || tempus.MIN_MONTH);
+                },
+                parse: function (value) {
+                    var v = Number(value);
+                    return {month: (isNaN(v) ? undefined : v) };
+                },
+                minLength: 1,
                 maxLength: 2,
                 type: "number"
             },
@@ -410,7 +457,19 @@
         };
 
         if (options !== undefined) {
-            this.set(options, format, defaults);
+            if (typeof format === 'object') {
+                var i = 0;
+                while (format[i] !== undefined) {
+                    this.set(options, format[i], defaults);
+                    if (this.valid()){
+                        i = -1;
+                    } else {
+                        i += 1;
+                    }
+                }
+            } else {
+                this.set(options, format, defaults);
+            }
         }
         return this;
     };
