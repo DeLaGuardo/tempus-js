@@ -1067,8 +1067,14 @@
                 format = tempus.detectFormat(newDate);
             }
             while (i < format.length) {
+                var offset = 1;
                 if (format.charAt(i) === '%') {
-                    directive = format.charAt(i) + format.charAt(i + 1);
+                    if (format.charAt(i + 1) === '-') {
+                        directive = format.charAt(i) + format.charAt(i + 1) + format.charAt(i + 2);
+                        offset = 2;
+                    } else {
+                        directive = format.charAt(i) + format.charAt(i + 1);
+                    }
                     if (registeredFormats[directive] !== undefined) {
                         k = 0;
                         shortString = '';
@@ -1112,7 +1118,7 @@
                         res.push(shortString);
                         k -= 1;
                         j += k;
-                        i += 1;
+                        i += offset;
                     }
                 } else {
                     if (newDate.charAt(j) !== format.charAt(i)) {
@@ -1502,11 +1508,17 @@
             result = '',
             directive;
         while (i < format.length) {
+            var offset = 1;
             if (format.charAt(i) === '%') {
-                directive = format.charAt(i) + format.charAt(i + 1);
+                if (format.charAt(i + 1) === '-') {
+                    directive = format.charAt(i) + format.charAt(i + 1) + format.charAt(i + 2);
+                    offset = 2;
+                } else {
+                    directive = format.charAt(i) + format.charAt(i + 1);
+                }
                 if (registeredFormats[directive] !== undefined) {
                     result += registeredFormats[directive].format(this);
-                    i += 1;
+                    i += offset;
                 } else {
                     result += '%';
                 }
